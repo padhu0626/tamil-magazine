@@ -1,0 +1,373 @@
+/**
+ * FlipBook Generator — Converts PDF to self-contained flip-book ZIP
+ * All processing happens client-side. PDFs never leave the browser.
+ */
+(function () {
+    'use strict';
+
+    // --- DOM refs ---
+    var dropZone = document.getElementById('drop-zone');
+    var pdfInput = document.getElementById('pdf-input');
+    var browseBtn = document.getElementById('browse-btn');
+    var fileInfo = document.getElementById('file-info');
+    var fileName = document.getElementById('file-name');
+    var fileSize = document.getElementById('file-size');
+    var removeFile = document.getElementById('remove-file');
+    var generateBtn = document.getElementById('generate-btn');
+    var progressSection = document.getElementById('progress-section');
+    var progressBar = document.getElementById('progress-bar');
+    var progressText = document.getElementById('progress-text');
+    var resultSection = document.getElementById('result-section');
+    var resultInfo = document.getElementById('result-info');
+    var downloadZipBtn = document.getElementById('download-zip-btn');
+    var previewBtn = document.getElementById('preview-btn');
+    var previewModal = document.getElementById('preview-modal');
+    var modalBackdrop = document.getElementById('modal-backdrop');
+    var modalClose = document.getElementById('modal-close');
+    var previewFrame = document.getElementById('preview-frame');
+    var bookTitle = document.getElementById('book-title');
+    var bgColor = document.getElementById('bg-color');
+    var bgColorLabel = document.getElementById('bg-color-label');
+    var qualitySelect = document.getElementById('quality-select');
+    var scaleSelect = document.getElementById('scale-select');
+
+    var currentFile = null;
+    var generatedZip = null;
+    var generatedHtml = null;
+
+    // --- PDF.js worker ---
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'assets/js/lib/pdf.worker.min.js';
+
+    // --- File Upload ---
+    browseBtn.addEventListener('click', function () { pdfInput.click(); });
+    dropZone.addEventListener('click', function () { pdfInput.click(); });
+
+    pdfInput.addEventListener('change', function () {
+        if (this.files && this.files[0]) handleFile(this.files[0]);
+    });
+
+    dropZone.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', function () {
+        dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            handleFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    function handleFile(file) {
+        if (file.type !== 'application/pdf') {
+            alert('Please upload a PDF file.');
+            return;
+        }
+        if (file.size > 50 * 1024 * 1024) {
+            alert('File too large. Maximum 50 MB.');
+            return;
+        }
+        currentFile = file;
+        fileName.textContent = file.name;
+        fileSize.textContent = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+        fileInfo.hidden = false;
+        dropZone.hidden = true;
+        generateBtn.disabled = false;
+
+        // Auto-fill title from filename
+        if (!bookTitle.value) {
+            bookTitle.value = file.name.replace(/\.pdf$/i, '');
+        }
+
+        // Reset previous results
+        resultSection.hidden = true;
+        generatedZip = null;
+        generatedHtml = null;
+    }
+
+    removeFile.addEventListener('click', function () {
+        currentFile = null;
+        pdfInput.value = '';
+        fileInfo.hidden = true;
+        dropZone.hidden = false;
+        generateBtn.disabled = true;
+        resultSection.hidden = true;
+    });
+
+    // --- Color picker ---
+    bgColor.addEventListener('input', function () {
+        bgColorLabel.textContent = this.value;
+    });
+
+    // --- Generate ---
+    generateBtn.addEventListener('click', async function () {
+        if (!currentFile) return;
+
+        generateBtn.disabled = true;
+        progressSection.hidden = false;
+        resultSection.hidden = true;
+        progressBar.style.width = '0%';
+
+        try {
+            await generate();
+        } catch (err) {
+            console.error('Generation failed:', err);
+            progressText.textContent = 'Error: ' + err.message;
+            generateBtn.disabled = false;
+        }
+    });
+
+    async function generate() {
+        var quality = parseFloat(qualitySelect.value);
+        var scale = parseFloat(scaleSelect.value);
+        var title = bookTitle.value || 'FlipBook';
+        var background = bgColor.value;
+
+        // Step 1: Read PDF
+        progressText.textContent = 'Reading PDF...';
+        var arrayBuffer = await currentFile.arrayBuffer();
+        var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        var totalPages = pdf.numPages;
+
+        progressText.textContent = 'Rendering ' + totalPages + ' pages...';
+
+        // Step 2: Render pages to images
+        var pageImages = []; // { dataUrl, width, height }
+        for (var i = 1; i <= totalPages; i++) {
+            progressText.textContent = 'Rendering page ' + i + ' of ' + totalPages + '...';
+            progressBar.style.width = Math.round((i / totalPages) * 80) + '%';
+
+            var page = await pdf.getPage(i);
+            var viewport = page.getViewport({ scale: scale });
+
+            var canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            var ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+            var dataUrl = canvas.toDataURL('image/jpeg', quality);
+            pageImages.push({
+                dataUrl: dataUrl,
+                width: viewport.width,
+                height: viewport.height
+            });
+        }
+
+        // Step 3: Build self-contained HTML
+        progressText.textContent = 'Building flip-book...';
+        progressBar.style.width = '85%';
+
+        var pageWidth = pageImages[0].width;
+        var pageHeight = pageImages[0].height;
+
+        generatedHtml = buildFlipBookHtml(title, background, pageImages, pageWidth, pageHeight);
+
+        // Step 4: Create ZIP
+        progressText.textContent = 'Creating ZIP...';
+        progressBar.style.width = '95%';
+
+        var zip = new JSZip();
+        zip.file('index.html', generatedHtml);
+
+        generatedZip = await zip.generateAsync({ type: 'blob' });
+
+        // Done
+        progressBar.style.width = '100%';
+        progressText.textContent = 'Done!';
+        progressSection.hidden = true;
+        resultSection.hidden = false;
+        resultInfo.textContent = totalPages + ' pages | ' + (generatedZip.size / (1024 * 1024)).toFixed(1) + ' MB ZIP';
+        generateBtn.disabled = false;
+    }
+
+    function buildFlipBookHtml(title, bgColor, pages, pageWidth, pageHeight) {
+        // Extract base64 data from dataUrls for embedding
+        var pagesHtml = '';
+        for (var i = 0; i < pages.length; i++) {
+            var density = (i === 0 || i === pages.length - 1) ? 'hard' : 'soft';
+            pagesHtml += '<div class="page" data-density="' + density + '">' +
+                '<img src="' + pages[i].dataUrl + '" alt="Page ' + (i + 1) + '">' +
+                '</div>\n';
+        }
+
+        var ratio = pageHeight / pageWidth;
+
+        return '<!DOCTYPE html>\n' +
+'<html lang="en">\n' +
+'<head>\n' +
+'<meta charset="UTF-8">\n' +
+'<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+'<title>' + escapeHtml(title) + '</title>\n' +
+'<style>\n' +
+'*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n' +
+'html, body { height: 100%; overflow: hidden; }\n' +
+'body {\n' +
+'  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;\n' +
+'  background: ' + bgColor + ';\n' +
+'  color: #e0e0e0;\n' +
+'  display: flex;\n' +
+'  flex-direction: column;\n' +
+'}\n' +
+'.header {\n' +
+'  display: flex;\n' +
+'  align-items: center;\n' +
+'  justify-content: space-between;\n' +
+'  padding: 0.5rem 1rem;\n' +
+'  background: rgba(0,0,0,0.3);\n' +
+'  flex-shrink: 0;\n' +
+'}\n' +
+'.header h1 { font-size: 1rem; font-weight: 500; }\n' +
+'.controls {\n' +
+'  display: flex;\n' +
+'  align-items: center;\n' +
+'  justify-content: center;\n' +
+'  gap: 1.5rem;\n' +
+'  padding: 0.6rem;\n' +
+'  background: rgba(0,0,0,0.3);\n' +
+'  flex-shrink: 0;\n' +
+'}\n' +
+'.btn {\n' +
+'  background: rgba(255,255,255,0.15);\n' +
+'  color: #fff;\n' +
+'  border: none;\n' +
+'  padding: 0.4rem 0.8rem;\n' +
+'  border-radius: 6px;\n' +
+'  cursor: pointer;\n' +
+'  font-size: 0.9rem;\n' +
+'}\n' +
+'.btn:hover { background: rgba(255,255,255,0.25); }\n' +
+'.btn:disabled { opacity: 0.3; cursor: default; }\n' +
+'.page-info { font-size: 0.9rem; color: #aaa; min-width: 60px; text-align: center; }\n' +
+'#flipbook-wrap {\n' +
+'  flex: 1;\n' +
+'  display: flex;\n' +
+'  align-items: center;\n' +
+'  justify-content: center;\n' +
+'  overflow: hidden;\n' +
+'  padding: 0.5rem;\n' +
+'}\n' +
+'#flipbook { width: 100%; max-width: 900px; }\n' +
+'.page { background: #fff; }\n' +
+'.page img { display: block; width: 100%; height: 100%; object-fit: contain; }\n' +
+'.fs-btn { font-size: 1.2rem; padding: 0.3rem 0.6rem; }\n' +
+'</style>\n' +
+'</head>\n' +
+'<body>\n' +
+'<div class="header">\n' +
+'  <h1>' + escapeHtml(title) + '</h1>\n' +
+'  <button class="btn fs-btn" id="fs-btn" title="Fullscreen">&#x26F6;</button>\n' +
+'</div>\n' +
+'<div id="flipbook-wrap"><div id="flipbook">\n' +
+pagesHtml +
+'</div></div>\n' +
+'<div class="controls">\n' +
+'  <button class="btn" id="prev-btn">&#x25C0; Prev</button>\n' +
+'  <span class="page-info" id="page-info">1 / ' + pages.length + '</span>\n' +
+'  <button class="btn" id="next-btn">Next &#x25B6;</button>\n' +
+'</div>\n' +
+'<script>\n' +
+getPageFlipSource() + '\n' +
+'(function(){\n' +
+'  var el = document.getElementById("flipbook");\n' +
+'  var isMobile = window.innerWidth < 600;\n' +
+'  var pf = new St.PageFlip(el, {\n' +
+'    width: ' + Math.round(pageWidth) + ',\n' +
+'    height: ' + Math.round(pageHeight) + ',\n' +
+'    size: "stretch",\n' +
+'    minWidth: 200, maxWidth: 1000,\n' +
+'    minHeight: 300, maxHeight: 1400,\n' +
+'    showCover: true,\n' +
+'    maxShadowOpacity: 0.5,\n' +
+'    mobileScrollSupport: false,\n' +
+'    flippingTime: 800,\n' +
+'    usePortrait: isMobile,\n' +
+'    autoSize: true,\n' +
+'    drawShadow: true,\n' +
+'    useMouseEvents: true\n' +
+'  });\n' +
+'  pf.loadFromHTML(document.querySelectorAll(".page"));\n' +
+'  var total = ' + pages.length + ';\n' +
+'  var info = document.getElementById("page-info");\n' +
+'  var prevBtn = document.getElementById("prev-btn");\n' +
+'  var nextBtn = document.getElementById("next-btn");\n' +
+'  function upd() {\n' +
+'    var c = pf.getCurrentPageIndex() + 1;\n' +
+'    info.textContent = c + " / " + total;\n' +
+'    prevBtn.disabled = c <= 1;\n' +
+'    nextBtn.disabled = c >= total;\n' +
+'  }\n' +
+'  pf.on("flip", upd);\n' +
+'  prevBtn.onclick = function(){ pf.flipPrev(); };\n' +
+'  nextBtn.onclick = function(){ pf.flipNext(); };\n' +
+'  document.addEventListener("keydown", function(e) {\n' +
+'    if (e.key==="ArrowLeft"||e.key==="PageUp") { e.preventDefault(); pf.flipPrev(); }\n' +
+'    if (e.key==="ArrowRight"||e.key==="PageDown"||e.key===" ") { e.preventDefault(); pf.flipNext(); }\n' +
+'    if (e.key==="Escape" && document.fullscreenElement) document.exitFullscreen();\n' +
+'  });\n' +
+'  document.getElementById("fs-btn").onclick = function() {\n' +
+'    if (!document.fullscreenElement) document.documentElement.requestFullscreen();\n' +
+'    else document.exitFullscreen();\n' +
+'  };\n' +
+'  upd();\n' +
+'})();\n' +
+'</' + 'script>\n' +
+'</body>\n' +
+'</html>';
+    }
+
+    function getPageFlipSource() {
+        // StPageFlip library source is loaded globally — we read it from the loaded script
+        // We need to inline it. Since it's already loaded, we'll fetch it.
+        // This is set during init below.
+        return window._pageFlipSource || '';
+    }
+
+    // Pre-fetch the StPageFlip source code for embedding
+    fetch('assets/js/lib/page-flip.browser.js')
+        .then(function (r) { return r.text(); })
+        .then(function (src) { window._pageFlipSource = src; });
+
+    // --- Download ZIP ---
+    downloadZipBtn.addEventListener('click', function () {
+        if (!generatedZip) return;
+        var name = (bookTitle.value || 'flipbook').replace(/[^a-zA-Z0-9_-]/g, '_');
+        saveAs(generatedZip, name + '.zip');
+    });
+
+    // --- Preview ---
+    previewBtn.addEventListener('click', function () {
+        if (!generatedHtml) return;
+        var blob = new Blob([generatedHtml], { type: 'text/html' });
+        var url = URL.createObjectURL(blob);
+        previewFrame.src = url;
+        previewModal.hidden = false;
+    });
+
+    modalClose.addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', closeModal);
+
+    function closeModal() {
+        previewModal.hidden = true;
+        previewFrame.src = '';
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !previewModal.hidden) closeModal();
+    });
+
+    // --- Helpers ---
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+})();

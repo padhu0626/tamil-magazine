@@ -1,29 +1,39 @@
-# இரண்டாயிரம் ஆண்டுகள் இளமை — Tamil E-Magazine
+# FlipBook Generator
 
-A self-hosted Tamil e-magazine platform with realistic flip-book reading experience.
+Convert any PDF into a self-contained flip-book with realistic page-turn animations. The output is a single HTML file you can host anywhere.
 
 ## Features
 
+- 100% client-side — your PDFs never leave your browser
 - Realistic page-flip animation (StPageFlip)
-- In-browser PDF rendering (PDF.js)
-- Mobile-friendly, Tamil-first design
-- Client-side admin tool for publishing new issues
-- Free hosting on GitHub Pages
+- Touch/swipe support on mobile
+- Keyboard navigation (arrow keys, space)
+- Fullscreen mode
+- Configurable quality, resolution, and background color
+- Self-contained output — single ZIP, host on any static server
 
-## Getting Started
+## How to Use
 
-Open `index.html` in a browser or deploy to any static hosting service.
+1. Open `index.html` in a browser
+2. Upload a PDF
+3. Configure title, colors, quality
+4. Click "Generate Flip-Book"
+5. Download the ZIP
+6. Unzip and host the `index.html` on any web server
 
-## Project Structure
+## Output
 
-```
-index.html          — Home page (issue listing)
-viewer.html         — Flip-book reader
-admin.html          — Admin tool for editors
-assets/             — CSS, JS, fonts, images
-issues/             — Magazine issues (PDF, covers, metadata)
-```
+The generated ZIP contains a single `index.html` file with:
+- All page images embedded as base64
+- StPageFlip library inlined
+- CSS and JS inlined
+- Zero external dependencies
 
-## License
+Just drop it on any web server and it works.
 
-MIT
+## Libraries
+
+- [StPageFlip](https://github.com/Nodlik/StPageFlip) — MIT License
+- [PDF.js](https://mozilla.github.io/pdf.js/) — Apache 2.0
+- [JSZip](https://stuk.github.io/jszip/) — MIT
+- [FileSaver.js](https://github.com/nicholaskim94/file-saver) — MIT

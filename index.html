@@ -1,94 +1,170 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>இரண்டாயிரம் ஆண்டுகள் இளமை — Tamil E-Magazine</title>
-    <meta name="description" content="A Tamil cultural e-magazine with realistic flip-book reading experience">
-    <meta property="og:title" content="இரண்டாயிரம் ஆண்டுகள் இளமை">
-    <meta property="og:description" content="A Tamil cultural e-magazine">
-    <meta property="og:type" content="website">
+    <title>FlipBook Generator — PDF to Flip-Book Converter</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
 <body>
-    <header class="site-header">
+    <header class="app-header">
         <div class="container">
-            <h1 class="magazine-title">இரண்டாயிரம் ஆண்டுகள் இளமை</h1>
-            <p class="magazine-tagline">தமிழ் பண்பாட்டு மின்-இதழ்</p>
-            <nav class="header-nav">
-                <a href="index.html">முகப்பு</a>
-                <a href="#issues">எல்லா இதழ்களும்</a>
-            </nav>
+            <h1 class="app-title">FlipBook Generator</h1>
+            <p class="app-tagline">Upload a PDF. Get a self-contained flip-book. Host it anywhere.</p>
         </div>
     </header>
 
     <main class="container">
-        <!-- Featured Issue -->
-        <section id="featured-section" class="featured-section" aria-label="சிறப்பு இதழ்">
-            <!-- Skeleton shown while loading -->
-            <div class="skeleton-featured">
-                <div class="skeleton-image"></div>
-                <div class="skeleton-body" style="flex:1; padding:1.5rem;">
-                    <div class="skeleton-line short"></div>
-                    <div class="skeleton-line medium"></div>
-                    <div class="skeleton-line"></div>
-                    <div class="skeleton-line short"></div>
+        <!-- Step 1: Upload -->
+        <section class="step-card" id="step-upload">
+            <div class="step-header">
+                <span class="step-number">1</span>
+                <h2>Upload PDF</h2>
+            </div>
+            <div class="upload-area" id="drop-zone">
+                <input type="file" id="pdf-input" accept=".pdf" hidden>
+                <div class="upload-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                </div>
+                <p class="upload-text">Drag & drop your PDF here</p>
+                <p class="upload-subtext">or <button type="button" class="link-btn" id="browse-btn">browse files</button></p>
+                <p class="upload-limit">Max 50 MB</p>
+            </div>
+            <div id="file-info" class="file-info" hidden>
+                <div class="file-info-inner">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    <span id="file-name"></span>
+                    <span id="file-size" class="file-size"></span>
+                    <button type="button" class="remove-btn" id="remove-file" aria-label="Remove">&times;</button>
                 </div>
             </div>
         </section>
 
-        <!-- Search & Filter -->
-        <section class="search-section">
-            <input type="search" id="search-input" class="search-input" placeholder="இதழ் தேடுங்கள்..." aria-label="இதழ் தேடுங்கள்">
-            <div class="lang-toggle" role="group" aria-label="Language">
-                <button class="active" data-lang="ta">தமிழ்</button>
-                <button data-lang="en">EN</button>
+        <!-- Step 2: Configure -->
+        <section class="step-card" id="step-config">
+            <div class="step-header">
+                <span class="step-number">2</span>
+                <h2>Configure</h2>
+            </div>
+            <div class="config-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="book-title">Title</label>
+                        <input type="text" id="book-title" placeholder="My Magazine" value="">
+                    </div>
+                    <div class="form-group">
+                        <label for="bg-color">Background Color</label>
+                        <div class="color-picker-row">
+                            <input type="color" id="bg-color" value="#1a1a2e">
+                            <span class="color-label" id="bg-color-label">#1a1a2e</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="quality-select">Image Quality</label>
+                        <select id="quality-select">
+                            <option value="0.7">Standard (smaller file)</option>
+                            <option value="0.85" selected>High (recommended)</option>
+                            <option value="0.95">Maximum (large file)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="scale-select">Resolution</label>
+                        <select id="scale-select">
+                            <option value="1.5">Normal (faster)</option>
+                            <option value="2" selected>Retina (recommended)</option>
+                            <option value="3">Ultra (slow, sharp)</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- All Issues -->
-        <section id="issues" class="issues-section">
-            <h2 class="section-title">எல்லா இதழ்களும்</h2>
-            <div id="issues-grid" class="issues-grid">
-                <!-- Skeleton cards while loading -->
-                <div class="skeleton-card">
-                    <div class="skeleton-image"></div>
-                    <div class="skeleton-body">
-                        <div class="skeleton-line medium"></div>
-                        <div class="skeleton-line short"></div>
-                    </div>
+        <!-- Step 3: Generate -->
+        <section class="step-card" id="step-generate">
+            <div class="step-header">
+                <span class="step-number">3</span>
+                <h2>Generate & Download</h2>
+            </div>
+            <button type="button" class="btn btn-primary btn-large" id="generate-btn" disabled>
+                Generate Flip-Book
+            </button>
+
+            <!-- Progress -->
+            <div id="progress-section" class="progress-section" hidden>
+                <div class="progress-bar-wrapper">
+                    <div class="progress-bar" id="progress-bar"></div>
                 </div>
-                <div class="skeleton-card">
-                    <div class="skeleton-image"></div>
-                    <div class="skeleton-body">
-                        <div class="skeleton-line medium"></div>
-                        <div class="skeleton-line short"></div>
-                    </div>
-                </div>
-                <div class="skeleton-card">
-                    <div class="skeleton-image"></div>
-                    <div class="skeleton-body">
-                        <div class="skeleton-line medium"></div>
-                        <div class="skeleton-line short"></div>
+                <p id="progress-text" class="progress-text">Starting...</p>
+            </div>
+
+            <!-- Result -->
+            <div id="result-section" class="result-section" hidden>
+                <div class="result-card">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <h3>Flip-book ready!</h3>
+                    <p id="result-info"></p>
+                    <div class="result-actions">
+                        <button type="button" class="btn btn-primary" id="download-zip-btn">Download ZIP</button>
+                        <button type="button" class="btn btn-secondary" id="preview-btn">Preview</button>
                     </div>
                 </div>
             </div>
-            <div id="error-message" class="error-message" hidden>
-                <p>இதழ்களை ஏற்ற இயலவில்லை. மீண்டும் முயற்சிக்கவும்.</p>
-                <button class="btn btn-secondary" onclick="location.reload()" style="margin-top:1rem;">மீண்டும் முயற்சி</button>
+        </section>
+
+        <!-- How it works -->
+        <section class="info-section">
+            <h2>How It Works</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-icon">1</div>
+                    <h3>Upload</h3>
+                    <p>Upload any PDF file — magazine, brochure, catalog, report.</p>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">2</div>
+                    <h3>Convert</h3>
+                    <p>Each page is rendered to a high-quality image and bundled with a flip-book viewer.</p>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">3</div>
+                    <h3>Host Anywhere</h3>
+                    <p>The output is a self-contained ZIP. Unzip it, upload to any web server. Done.</p>
+                </div>
             </div>
         </section>
     </main>
 
-    <footer class="site-footer">
+    <footer class="app-footer">
         <div class="container">
-            <p>&copy; 2026 இரண்டாயிரம் ஆண்டுகள் இளமை. அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.</p>
+            <p>FlipBook Generator &mdash; 100% client-side. Your PDFs never leave your browser.</p>
         </div>
     </footer>
 
-    <script src="assets/js/home.js"></script>
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="modal" hidden>
+        <div class="modal-backdrop" id="modal-backdrop"></div>
+        <div class="modal-content">
+            <button type="button" class="modal-close" id="modal-close">&times;</button>
+            <iframe id="preview-frame" class="preview-frame"></iframe>
+        </div>
+    </div>
+
+    <script src="assets/js/lib/pdf.min.js"></script>
+    <script src="assets/js/lib/page-flip.browser.js"></script>
+    <script src="assets/js/lib/jszip.min.js"></script>
+    <script src="assets/js/lib/FileSaver.min.js"></script>
+    <script src="assets/js/generator.js"></script>
 </body>
 </html>
