@@ -18,25 +18,67 @@
         <div class="container">
             <h1 class="magazine-title">இரண்டாயிரம் ஆண்டுகள் இளமை</h1>
             <p class="magazine-tagline">தமிழ் பண்பாட்டு மின்-இதழ்</p>
+            <nav class="header-nav">
+                <a href="index.html">முகப்பு</a>
+                <a href="#issues">எல்லா இதழ்களும்</a>
+            </nav>
         </div>
     </header>
 
     <main class="container">
+        <!-- Featured Issue -->
         <section id="featured-section" class="featured-section" aria-label="சிறப்பு இதழ்">
-            <!-- Featured issue rendered by JS -->
+            <!-- Skeleton shown while loading -->
+            <div class="skeleton-featured">
+                <div class="skeleton-image"></div>
+                <div class="skeleton-body" style="flex:1; padding:1.5rem;">
+                    <div class="skeleton-line short"></div>
+                    <div class="skeleton-line medium"></div>
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line short"></div>
+                </div>
+            </div>
         </section>
 
-        <section class="issues-section">
+        <!-- Search & Filter -->
+        <section class="search-section">
+            <input type="search" id="search-input" class="search-input" placeholder="இதழ் தேடுங்கள்..." aria-label="இதழ் தேடுங்கள்">
+            <div class="lang-toggle" role="group" aria-label="Language">
+                <button class="active" data-lang="ta">தமிழ்</button>
+                <button data-lang="en">EN</button>
+            </div>
+        </section>
+
+        <!-- All Issues -->
+        <section id="issues" class="issues-section">
             <h2 class="section-title">எல்லா இதழ்களும்</h2>
             <div id="issues-grid" class="issues-grid">
-                <!-- Issue cards rendered by JS -->
-            </div>
-            <div id="loading-indicator" class="loading">
-                <div class="spinner"></div>
-                <p>இதழ்கள் ஏற்றப்படுகின்றன...</p>
+                <!-- Skeleton cards while loading -->
+                <div class="skeleton-card">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-body">
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-body">
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-body">
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
             </div>
             <div id="error-message" class="error-message" hidden>
                 <p>இதழ்களை ஏற்ற இயலவில்லை. மீண்டும் முயற்சிக்கவும்.</p>
+                <button class="btn btn-secondary" onclick="location.reload()" style="margin-top:1rem;">மீண்டும் முயற்சி</button>
             </div>
         </section>
     </main>
