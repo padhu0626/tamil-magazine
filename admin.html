@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>நிர்வாகம் — இரண்டாயிரம் ஆண்டுகள் இளமை</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <h1 class="magazine-title">நிர்வாகக் கருவி</h1>
+            <p class="magazine-tagline">புதிய இதழைச் சேர்க்கவும்</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <form id="admin-form" class="admin-form">
+            <fieldset>
+                <legend>இதழ் விவரங்கள்</legend>
+
+                <div class="form-group">
+                    <label for="issue-id">இதழ் எண் (ID)</label>
+                    <input type="text" id="issue-id" placeholder="2026-01" required>
+                    <small>எ.கா: 2026-01, 2026-02</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="issue-title">இதழ் தலைப்பு (தமிழ்)</label>
+                    <input type="text" id="issue-title" placeholder="முதல் இதழ்" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="issue-title-en">Issue Title (English) — விருப்பத்தேர்வு</label>
+                    <input type="text" id="issue-title-en" placeholder="First Issue">
+                </div>
+
+                <div class="form-group">
+                    <label for="publish-date">வெளியீட்டு தேதி</label>
+                    <input type="date" id="publish-date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editor-name">ஆசிரியர் பெயர்</label>
+                    <input type="text" id="editor-name" placeholder="ஆசிரியர்">
+                </div>
+
+                <div class="form-group">
+                    <label for="pdf-upload">PDF கோப்பு</label>
+                    <div class="file-upload-area" id="pdf-drop-zone">
+                        <input type="file" id="pdf-upload" accept=".pdf" required>
+                        <p>PDF கோப்பை இழுத்து விடுங்கள் அல்லது கிளிக் செய்யுங்கள்</p>
+                        <small id="pdf-info"></small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="cover-upload">அட்டைப்படம் (விருப்பத்தேர்வு — PDF முதல் பக்கத்திலிருந்து எடுக்கப்படும்)</label>
+                    <input type="file" id="cover-upload" accept="image/*">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="featured-toggle">
+                        சிறப்பு இதழாகக் காட்டு
+                    </label>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>கட்டுரைகள்</legend>
+                <div id="articles-list">
+                    <!-- Dynamic article rows added by JS -->
+                </div>
+                <button type="button" id="add-article-btn" class="btn btn-secondary">+ கட்டுரை சேர்</button>
+            </fieldset>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">இதழ் தொகுப்பை உருவாக்கு</button>
+            </div>
+
+            <div id="admin-status" class="admin-status" hidden></div>
+        </form>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>நிர்வாகக் கருவி — உள்ளக பயன்பாட்டிற்கு மட்டும்</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/admin.js"></script>
+</body>
+</html>

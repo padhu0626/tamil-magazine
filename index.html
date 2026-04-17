@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>இரண்டாயிரம் ஆண்டுகள் இளமை — Tamil E-Magazine</title>
+    <meta name="description" content="A Tamil cultural e-magazine with realistic flip-book reading experience">
+    <meta property="og:title" content="இரண்டாயிரம் ஆண்டுகள் இளமை">
+    <meta property="og:description" content="A Tamil cultural e-magazine">
+    <meta property="og:type" content="website">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <h1 class="magazine-title">இரண்டாயிரம் ஆண்டுகள் இளமை</h1>
+            <p class="magazine-tagline">தமிழ் பண்பாட்டு மின்-இதழ்</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="featured-section" class="featured-section" aria-label="சிறப்பு இதழ்">
+            <!-- Featured issue rendered by JS -->
+        </section>
+
+        <section class="issues-section">
+            <h2 class="section-title">எல்லா இதழ்களும்</h2>
+            <div id="issues-grid" class="issues-grid">
+                <!-- Issue cards rendered by JS -->
+            </div>
+            <div id="loading-indicator" class="loading">
+                <div class="spinner"></div>
+                <p>இதழ்கள் ஏற்றப்படுகின்றன...</p>
+            </div>
+            <div id="error-message" class="error-message" hidden>
+                <p>இதழ்களை ஏற்ற இயலவில்லை. மீண்டும் முயற்சிக்கவும்.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 இரண்டாயிரம் ஆண்டுகள் இளமை. அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.</p>
+        </div>
+    </footer>
+
+    <script src="assets/js/home.js"></script>
+</body>
+</html>

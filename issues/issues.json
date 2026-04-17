@@ -1,0 +1,31 @@
+{
+  "magazine_name": "இரண்டாயிரம் ஆண்டுகள் இளமை",
+  "magazine_name_english": "Irandayiram Aandugal Ilamai",
+  "description": "A Tamil cultural e-magazine",
+  "issues": [
+    {
+      "id": "2026-01",
+      "issue_number": 1,
+      "title": "முதல் இதழ்",
+      "title_english": "First Issue",
+      "published_date": "2026-04-01",
+      "cover_image": "issues/2026-01/cover.jpg",
+      "pdf_path": "issues/2026-01/magazine.pdf",
+      "metadata_path": "issues/2026-01/metadata.json",
+      "page_count": 12,
+      "featured": true
+    },
+    {
+      "id": "2026-02",
+      "issue_number": 2,
+      "title": "இரண்டாம் இதழ்",
+      "title_english": "Second Issue",
+      "published_date": "2026-04-15",
+      "cover_image": "issues/2026-02/cover.jpg",
+      "pdf_path": "issues/2026-02/magazine.pdf",
+      "metadata_path": "issues/2026-02/metadata.json",
+      "page_count": 8,
+      "featured": false
+    }
+  ]
+}
