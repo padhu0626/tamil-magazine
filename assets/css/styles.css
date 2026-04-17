@@ -416,6 +416,10 @@ a:hover { text-decoration: underline; }
 }
 
 /* --- Modal --- */
+.modal[hidden] {
+    display: none !important;
+}
+
 .modal {
     position: fixed;
     inset: 0;
