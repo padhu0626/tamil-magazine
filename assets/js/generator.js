@@ -217,7 +217,7 @@
 '  display: flex;\n' +
 '  align-items: center;\n' +
 '  justify-content: space-between;\n' +
-'  padding: 0.5rem 1rem;\n' +
+'  padding: 0.4rem 1rem;\n' +
 '  background: rgba(0,0,0,0.3);\n' +
 '  flex-shrink: 0;\n' +
 '}\n' +
@@ -227,7 +227,7 @@
 '  align-items: center;\n' +
 '  justify-content: center;\n' +
 '  gap: 1.5rem;\n' +
-'  padding: 0.6rem;\n' +
+'  padding: 0.4rem;\n' +
 '  background: rgba(0,0,0,0.3);\n' +
 '  flex-shrink: 0;\n' +
 '}\n' +
@@ -248,10 +248,11 @@
 '  display: flex;\n' +
 '  align-items: center;\n' +
 '  justify-content: center;\n' +
-'  overflow: hidden;\n' +
-'  padding: 0.5rem;\n' +
+'  min-height: 0;\n' +
+'  padding: 0.25rem;\n' +
 '}\n' +
-'#flipbook { width: 100%; max-width: 900px; }\n' +
+'#flipbook { width: 100%; max-width: 900px; max-height: 100%; }\n' +
+'.stf__wrapper { max-height: calc(100vh - 80px) !important; }\n' +
 '.page { background: #fff; }\n' +
 '.page img { display: block; width: 100%; height: 100%; object-fit: contain; }\n' +
 '.fs-btn { font-size: 1.2rem; padding: 0.3rem 0.6rem; }\n' +
@@ -275,12 +276,17 @@ getPageFlipSource() + '\n' +
 '(function(){\n' +
 '  var el = document.getElementById("flipbook");\n' +
 '  var isMobile = window.innerWidth < 600;\n' +
+'  var availH = window.innerHeight - 80;\n' +
+'  var ratio = ' + ratio.toFixed(4) + ';\n' +
+'  var fitW = Math.round(availH / ratio);\n' +
+'  if (fitW > 500) fitW = 500;\n' +
+'  var fitH = Math.round(fitW * ratio);\n' +
 '  var pf = new St.PageFlip(el, {\n' +
-'    width: ' + Math.round(pageWidth) + ',\n' +
-'    height: ' + Math.round(pageHeight) + ',\n' +
+'    width: fitW,\n' +
+'    height: fitH,\n' +
 '    size: "stretch",\n' +
-'    minWidth: 200, maxWidth: 1000,\n' +
-'    minHeight: 300, maxHeight: 1400,\n' +
+'    minWidth: 150, maxWidth: 600,\n' +
+'    minHeight: 200, maxHeight: availH,\n' +
 '    showCover: true,\n' +
 '    maxShadowOpacity: 0.5,\n' +
 '    mobileScrollSupport: false,\n' +
