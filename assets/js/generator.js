@@ -189,8 +189,7 @@
         // Extract base64 data from dataUrls for embedding
         var pagesHtml = '';
         for (var i = 0; i < pages.length; i++) {
-            var density = (i === 0 || i === pages.length - 1) ? 'hard' : 'soft';
-            pagesHtml += '<div class="page" data-density="' + density + '">' +
+            pagesHtml += '<div class="page" data-density="soft">' +
                 '<img src="' + pages[i].dataUrl + '" alt="Page ' + (i + 1) + '">' +
                 '</div>\n';
         }
@@ -287,7 +286,7 @@ getPageFlipSource() + '\n' +
 '    size: "stretch",\n' +
 '    minWidth: 150, maxWidth: 600,\n' +
 '    minHeight: 200, maxHeight: availH,\n' +
-'    showCover: true,\n' +
+'    showCover: false,\n' +
 '    maxShadowOpacity: 0.5,\n' +
 '    mobileScrollSupport: false,\n' +
 '    flippingTime: 800,\n' +
