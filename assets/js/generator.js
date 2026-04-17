@@ -21,10 +21,6 @@
     var resultInfo = document.getElementById('result-info');
     var downloadZipBtn = document.getElementById('download-zip-btn');
     var previewBtn = document.getElementById('preview-btn');
-    var previewModal = document.getElementById('preview-modal');
-    var modalBackdrop = document.getElementById('modal-backdrop');
-    var modalClose = document.getElementById('modal-close');
-    var previewFrame = document.getElementById('preview-frame');
     var bookTitle = document.getElementById('book-title');
     var bgColor = document.getElementById('bg-color');
     var bgColorLabel = document.getElementById('bg-color-label');
@@ -343,25 +339,55 @@ getPageFlipSource() + '\n' +
         saveAs(generatedZip, name + '.zip');
     });
 
-    // --- Preview ---
+    // --- Preview (modal created dynamically) ---
+    var modalEl = null;
+    var modalFrame = null;
+
+    function createModal() {
+        modalEl = document.createElement('div');
+        modalEl.style.cssText = 'position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;';
+
+        var backdrop = document.createElement('div');
+        backdrop.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.7);';
+        backdrop.addEventListener('click', closeModal);
+
+        var content = document.createElement('div');
+        content.style.cssText = 'position:relative;width:95vw;height:90vh;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.1);';
+
+        var closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '&times;';
+        closeBtn.style.cssText = 'position:absolute;top:0.5rem;right:0.75rem;background:rgba(0,0,0,0.5);color:#fff;border:none;font-size:1.5rem;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:10;';
+        closeBtn.addEventListener('click', closeModal);
+
+        modalFrame = document.createElement('iframe');
+        modalFrame.style.cssText = 'width:100%;height:100%;border:none;';
+
+        content.appendChild(closeBtn);
+        content.appendChild(modalFrame);
+        modalEl.appendChild(backdrop);
+        modalEl.appendChild(content);
+        document.body.appendChild(modalEl);
+    }
+
+    function closeModal() {
+        if (modalEl) {
+            modalFrame.src = '';
+            modalEl.remove();
+            modalEl = null;
+            modalFrame = null;
+        }
+    }
+
     previewBtn.addEventListener('click', function () {
         if (!generatedHtml) return;
         var blob = new Blob([generatedHtml], { type: 'text/html' });
         var url = URL.createObjectURL(blob);
-        previewFrame.src = url;
-        previewModal.hidden = false;
+        createModal();
+        modalFrame.src = url;
     });
 
-    modalClose.addEventListener('click', closeModal);
-    modalBackdrop.addEventListener('click', closeModal);
-
-    function closeModal() {
-        previewModal.hidden = true;
-        previewFrame.src = '';
-    }
-
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && !previewModal.hidden) closeModal();
+        if (e.key === 'Escape' && modalEl) closeModal();
     });
 
     // --- Helpers ---
