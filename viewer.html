@@ -41,21 +41,19 @@
 
     <main class="viewer-main">
         <div id="flipbook-container" class="flipbook-container">
-            <div id="flipbook" class="flipbook">
-                <!-- Pages rendered by JS -->
-            </div>
+            <!-- StPageFlip renders here -->
         </div>
 
         <div id="viewer-loading" class="viewer-loading">
             <div class="spinner"></div>
             <p id="loading-text">இதழ் ஏற்றப்படுகிறது...</p>
-            <div id="loading-progress" class="loading-progress" hidden>
+            <div id="loading-progress" class="loading-progress">
                 <div id="progress-bar" class="progress-bar"></div>
             </div>
         </div>
 
         <div id="viewer-error" class="viewer-error" hidden>
-            <p>இதழை ஏற்ற இயலவில்லை.</p>
+            <p id="error-text">இதழை ஏற்ற இயலவில்லை.</p>
             <a href="index.html" class="btn">முகப்புக்குத் திரும்பு</a>
         </div>
     </main>
@@ -74,6 +72,8 @@
         </button>
     </footer>
 
+    <script src="assets/js/lib/pdf.min.js"></script>
+    <script src="assets/js/lib/page-flip.browser.js"></script>
     <script src="assets/js/viewer.js"></script>
 </body>
 </html>
