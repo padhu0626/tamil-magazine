@@ -211,7 +211,7 @@
 'html, body { height: 100%; overflow: hidden; }\n' +
 'body {\n' +
 '  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;\n' +
-'  background: ' + bgColor + ';\n' +
+'  background: #fff;\n' +
 '  color: #e0e0e0;\n' +
 '  display: flex;\n' +
 '  flex-direction: column;\n' +
@@ -221,7 +221,7 @@
 '  align-items: center;\n' +
 '  justify-content: space-between;\n' +
 '  padding: 0.4rem 1rem;\n' +
-'  background: rgba(0,0,0,0.3);\n' +
+'  background: ' + bgColor + ';\n' +
 '  flex-shrink: 0;\n' +
 '}\n' +
 '.header h1 { font-size: 1rem; font-weight: 500; }\n' +
@@ -231,8 +231,10 @@
 '  justify-content: center;\n' +
 '  gap: 1.5rem;\n' +
 '  padding: 0.4rem;\n' +
-'  background: rgba(0,0,0,0.3);\n' +
+'  background: ' + bgColor + ';\n' +
 '  flex-shrink: 0;\n' +
+'  position: relative;\n' +
+'  z-index: 100;\n' +
 '}\n' +
 '.btn {\n' +
 '  background: rgba(255,255,255,0.15);\n' +
@@ -319,8 +321,12 @@ getPageFlipSource() + '\n' +
 '    nextBtn.disabled = c >= total;\n' +
 '  }\n' +
 '  pf.on("flip", upd);\n' +
-'  prevBtn.onclick = function(){ pf.flipPrev(); };\n' +
-'  nextBtn.onclick = function(){ pf.flipNext(); };\n' +
+'  prevBtn.addEventListener("mousedown", function(e){ e.stopPropagation(); });\n' +
+'  nextBtn.addEventListener("mousedown", function(e){ e.stopPropagation(); });\n' +
+'  prevBtn.addEventListener("touchstart", function(e){ e.stopPropagation(); });\n' +
+'  nextBtn.addEventListener("touchstart", function(e){ e.stopPropagation(); });\n' +
+'  prevBtn.addEventListener("click", function(e){ e.stopPropagation(); pf.flipPrev(); });\n' +
+'  nextBtn.addEventListener("click", function(e){ e.stopPropagation(); pf.flipNext(); });\n' +
 '  document.addEventListener("keydown", function(e) {\n' +
 '    if (e.key==="ArrowLeft"||e.key==="PageUp") { e.preventDefault(); pf.flipPrev(); }\n' +
 '    if (e.key==="ArrowRight"||e.key==="PageDown"||e.key===" ") { e.preventDefault(); pf.flipNext(); }\n' +
