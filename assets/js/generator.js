@@ -211,7 +211,7 @@
 'html, body { height: 100%; overflow: hidden; }\n' +
 'body {\n' +
 '  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;\n' +
-'  background: #fff;\n' +
+'  background: #e8e8e8;\n' +
 '  color: #e0e0e0;\n' +
 '  display: flex;\n' +
 '  flex-direction: column;\n' +
@@ -255,9 +255,9 @@
 '  justify-content: center;\n' +
 '  min-height: 0;\n' +
 '  overflow: hidden;\n' +
-'  background: #fff;\n' +
+'  background: #e8e8e8;\n' +
 '}\n' +
-'#flipbook { background: #fff; }\n' +
+'#flipbook { background: #fff; box-shadow: 0 2px 20px rgba(0,0,0,0.15); }\n' +
 '.stf__wrapper, .stf__block, .stf__parent, .stf__canvas { background: #fff !important; }\n' +
 '.page { background: #fff; }\n' +
 '.page img { display: block; width: 100%; height: 100%; object-fit: contain; }\n' +
