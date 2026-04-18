@@ -186,12 +186,16 @@
     }
 
     function buildFlipBookHtml(title, bgColor, pages, pageWidth, pageHeight) {
-        // Extract base64 data from dataUrls for embedding
-        var pagesHtml = '';
+        // Add blank page at start so it opens as a spread (no cover-to-spread gap)
+        var pagesHtml = '<div class="page" data-density="soft"><div style="width:100%;height:100%;background:#fff;"></div></div>\n';
         for (var i = 0; i < pages.length; i++) {
             pagesHtml += '<div class="page" data-density="soft">' +
                 '<img src="' + pages[i].dataUrl + '" alt="Page ' + (i + 1) + '">' +
                 '</div>\n';
+        }
+        // Add blank page at end if total (including blanks) is odd, for even spread
+        if ((pages.length + 1) % 2 !== 0) {
+            pagesHtml += '<div class="page" data-density="soft"><div style="width:100%;height:100%;background:#fff;"></div></div>\n';
         }
 
         var ratio = pageHeight / pageWidth;
@@ -293,7 +297,7 @@ getPageFlipSource() + '\n' +
 '    width: pageW,\n' +
 '    height: pageH,\n' +
 '    size: "fixed",\n' +
-'    showCover: true,\n' +
+'    showCover: false,\n' +
 '    maxShadowOpacity: 0.5,\n' +
 '    mobileScrollSupport: false,\n' +
 '    flippingTime: 800,\n' +
