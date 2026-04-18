@@ -250,7 +250,8 @@
 '  min-height: 0;\n' +
 '  overflow: hidden;\n' +
 '}\n' +
-'#flipbook { }\n' +
+'#flipbook { background: #fff; }\n' +
+'.stf__wrapper, .stf__block, .stf__parent { background: #fff; }\n' +
 '.page { background: #fff; }\n' +
 '.page img { display: block; width: 100%; height: 100%; object-fit: contain; }\n' +
 '.fs-btn { font-size: 1.2rem; padding: 0.3rem 0.6rem; }\n' +
