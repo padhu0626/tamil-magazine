@@ -286,13 +286,14 @@ getPageFlipSource() + '\n' +
 '    size: "stretch",\n' +
 '    minWidth: 150, maxWidth: 600,\n' +
 '    minHeight: 200, maxHeight: availH,\n' +
-'    showCover: false,\n' +
+'    showCover: true,\n' +
 '    maxShadowOpacity: 0.5,\n' +
 '    mobileScrollSupport: false,\n' +
 '    flippingTime: 800,\n' +
 '    usePortrait: isMobile,\n' +
 '    autoSize: true,\n' +
 '    drawShadow: true,\n' +
+'    clickEventForward: false,\n' +
 '    useMouseEvents: true\n' +
 '  });\n' +
 '  pf.loadFromHTML(document.querySelectorAll(".page"));\n' +
