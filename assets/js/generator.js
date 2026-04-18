@@ -283,18 +283,15 @@ getPageFlipSource() + '\n' +
 '  var el = document.getElementById("flipbook");\n' +
 '  var isMobile = window.innerWidth < 600;\n' +
 '  var ratio = ' + ratio.toFixed(4) + ';\n' +
-'  var availH = window.innerHeight - 80;\n' +
+'  var availH = window.innerHeight - 70;\n' +
 '  var availW = window.innerWidth;\n' +
 '  var pageW, pageH;\n' +
-'  if (isMobile) {\n' +
-'    pageW = Math.min(availW - 20, 500);\n' +
-'    pageH = Math.round(pageW * ratio);\n' +
-'    if (pageH > availH) { pageH = availH; pageW = Math.round(pageH / ratio); }\n' +
-'  } else {\n' +
-'    pageH = availH - 10;\n' +
-'    pageW = Math.round(pageH / ratio);\n' +
-'    if (pageW * 2 > availW - 40) { pageW = Math.round((availW - 40) / 2); pageH = Math.round(pageW * ratio); }\n' +
-'  }\n' +
+'  pageH = availH;\n' +
+'  pageW = Math.round(pageH / ratio);\n' +
+'  if (!isMobile && pageW * 2 > availW) { pageW = Math.round(availW / 2); pageH = Math.round(pageW * ratio); }\n' +
+'  if (isMobile && pageW > availW) { pageW = availW; pageH = Math.round(pageW * ratio); }\n' +
+'  el.style.width = (isMobile ? pageW : pageW * 2) + "px";\n' +
+'  el.style.height = pageH + "px";\n' +
 '  var pf = new St.PageFlip(el, {\n' +
 '    width: pageW,\n' +
 '    height: pageH,\n' +
