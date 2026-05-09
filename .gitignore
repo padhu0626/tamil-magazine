@@ -2,3 +2,6 @@
 node_modules/
 *.log
 .env
+*.pdf
+assets/js/lib/pdf.min.mjs
+assets/js/lib/pdf.worker.min.mjs
