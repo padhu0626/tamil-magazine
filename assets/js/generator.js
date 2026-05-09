@@ -1,7 +1,10 @@
 /**
  * FlipBook Generator — Converts PDF to self-contained flip-book ZIP
  * All processing happens client-side. PDFs never leave the browser.
+ * Uses MuPDF WASM for accurate color rendering.
  */
+import * as mupdf from './lib/mupdf.js';
+
 (function () {
     'use strict';
 
@@ -31,11 +34,8 @@
     var generatedZip = null;
     var generatedHtml = null;
 
-    // --- PDF.js worker ---
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'assets/js/lib/pdf.worker.min.js';
-
     // --- File Upload ---
-    browseBtn.addEventListener('click', function () { pdfInput.click(); });
+    browseBtn.addEventListener('click', function (e) { e.stopPropagation(); pdfInput.click(); });
     dropZone.addEventListener('click', function () { pdfInput.click(); });
 
     pdfInput.addEventListener('change', function () {
@@ -124,48 +124,59 @@
         var title = bookTitle.value || 'FlipBook';
         var background = bgColor.value;
 
-        // Step 1: Read PDF
+        // Step 1: Read PDF with MuPDF
         progressText.textContent = 'Reading PDF...';
         var arrayBuffer = await currentFile.arrayBuffer();
-        var pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        var totalPages = pdf.numPages;
+        var doc = mupdf.Document.openDocument(new Uint8Array(arrayBuffer), "application/pdf");
+        var totalPages = doc.countPages();
 
         progressText.textContent = 'Rendering ' + totalPages + ' pages...';
 
-        // Step 2: Render pages to images
-        var pageImages = []; // { dataUrl, width, height }
-        for (var i = 1; i <= totalPages; i++) {
-            progressText.textContent = 'Rendering page ' + i + ' of ' + totalPages + '...';
-            progressBar.style.width = Math.round((i / totalPages) * 80) + '%';
+        // Step 2: Render pages to images using MuPDF
+        var pageImages = [];
+        // Map quality (0-1) to JPEG quality (1-100)
+        var jpegQuality = Math.round(quality * 100);
 
-            var page = await pdf.getPage(i);
-            var viewport = page.getViewport({ scale: scale });
+        for (var i = 0; i < totalPages; i++) {
+            progressText.textContent = 'Rendering page ' + (i + 1) + ' of ' + totalPages + '...';
+            progressBar.style.width = Math.round(((i + 1) / totalPages) * 80) + '%';
 
-            var canvas = document.createElement('canvas');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-            var ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            var page = doc.loadPage(i);
+            var bounds = page.getBounds();
+            var pageWidth = bounds[2] - bounds[0];
+            var pageHeight = bounds[3] - bounds[1];
 
-            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+            // Scale matrix: [sx, 0, 0, sy, 0, 0]
+            var matrix = [scale * (96/72), 0, 0, scale * (96/72), 0, 0];
+            var pixmap = page.toPixmap(matrix, mupdf.ColorSpace.DeviceRGB, false);
 
-            var dataUrl = canvas.toDataURL('image/jpeg', quality);
+            var w = pixmap.getWidth();
+            var h = pixmap.getHeight();
+
+            // Get JPEG data
+            var jpegData = pixmap.asJPEG(jpegQuality);
+            var blob = new Blob([jpegData], { type: 'image/jpeg' });
+            var dataUrl = await blobToDataUrl(blob);
+
             pageImages.push({
                 dataUrl: dataUrl,
-                width: viewport.width,
-                height: viewport.height
+                width: w,
+                height: h
             });
+
+            pixmap.destroy();
         }
+
+        doc.destroy();
 
         // Step 3: Build self-contained HTML
         progressText.textContent = 'Building flip-book...';
         progressBar.style.width = '85%';
 
-        var pageWidth = pageImages[0].width;
-        var pageHeight = pageImages[0].height;
+        var pw = pageImages[0].width;
+        var ph = pageImages[0].height;
 
-        generatedHtml = buildFlipBookHtml(title, background, pageImages, pageWidth, pageHeight);
+        generatedHtml = buildFlipBookHtml(title, background, pageImages, pw, ph);
 
         // Step 4: Create ZIP
         progressText.textContent = 'Creating ZIP...';
@@ -185,17 +196,29 @@
         generateBtn.disabled = false;
     }
 
+    function blobToDataUrl(blob) {
+        return new Promise(function (resolve) {
+            var reader = new FileReader();
+            reader.onload = function () { resolve(reader.result); };
+            reader.readAsDataURL(blob);
+        });
+    }
+
     function buildFlipBookHtml(title, bgColor, pages, pageWidth, pageHeight) {
-        // Add blank page at start so it opens as a spread (no cover-to-spread gap)
-        var pagesHtml = '<div class="page" data-density="soft"><div style="width:100%;height:100%;background:#fff;"></div></div>\n';
+        // First and last pages are hard covers
+        var pagesHtml = '';
         for (var i = 0; i < pages.length; i++) {
-            pagesHtml += '<div class="page" data-density="soft">' +
+            var density = (i === 0 || i === pages.length - 1) ? 'hard' : 'soft';
+            pagesHtml += '<div class="page" data-density="' + density + '">' +
                 '<img src="' + pages[i].dataUrl + '" alt="Page ' + (i + 1) + '">' +
                 '</div>\n';
         }
-        // Add blank page at end if total (including blanks) is odd, for even spread
-        if ((pages.length + 1) % 2 !== 0) {
-            pagesHtml += '<div class="page" data-density="soft"><div style="width:100%;height:100%;background:#fff;"></div></div>\n';
+        // Add blank page if inner pages (excluding covers) are odd, for even spread
+        if ((pages.length - 2) % 2 !== 0) {
+            var lastPage = pagesHtml.lastIndexOf('<div class="page" data-density="hard">');
+            pagesHtml = pagesHtml.substring(0, lastPage) +
+                '<div class="page" data-density="soft"><div style="width:100%;height:100%;background:#fff;"></div></div>\n' +
+                pagesHtml.substring(lastPage);
         }
 
         var ratio = pageHeight / pageWidth;
@@ -296,7 +319,7 @@ getPageFlipSource() + '\n' +
 '    width: pageW,\n' +
 '    height: pageH,\n' +
 '    size: "fixed",\n' +
-'    showCover: false,\n' +
+'    showCover: true,\n' +
 '    maxShadowOpacity: 0.5,\n' +
 '    mobileScrollSupport: false,\n' +
 '    flippingTime: 800,\n' +
@@ -341,9 +364,6 @@ getPageFlipSource() + '\n' +
     }
 
     function getPageFlipSource() {
-        // StPageFlip library source is loaded globally — we read it from the loaded script
-        // We need to inline it. Since it's already loaded, we'll fetch it.
-        // This is set during init below.
         return window._pageFlipSource || '';
     }
 
